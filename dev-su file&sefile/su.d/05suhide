@@ -1,0 +1,19 @@
+#!/su/bin/sush
+
+# unmount xposed if present, we will handle this internally in haploid
+
+umount -l /system/bin/app_process32
+umount -l /system/bin/app_process64
+
+# adjust SELinux policies
+
+# not to happy about this, but prevents us from needing to modify /init.zygote*.rc
+/su/bin/supolicy --live "allow zygote init process dyntransition"
+
+# enter teh haploid
+
+mount -o bind /su/suhide/haploid32 /system/bin/app_process32
+chcon u:object_r:zygote_exec:s0 /system/bin/app_process32
+
+mount -o bind /su/suhide/haploid64 /system/bin/app_process64
+chcon u:object_r:zygote_exec:s0 /system/bin/app_process64

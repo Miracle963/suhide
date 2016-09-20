@@ -1,0 +1,215 @@
+#!/sbin/sh
+
+OUTFD=$2
+ZIP=$3
+
+ui_print() {
+  echo -n -e "ui_print $1\n" > /proc/self/fd/$OUTFD
+  echo -n -e "ui_print\n" > /proc/self/fd/$OUTFD
+}
+
+ui_print " "
+ui_print "********************"
+ui_print "Installing suhide..."
+ui_print "********************"
+ui_print " "
+
+mount -o ro /system
+mount /system
+mount -o rw,remount /
+
+cd /tmp
+mkdir suhide
+cd suhide
+
+unzip -o "$ZIP"
+
+# remove v0.16 and older
+
+if (cat /data/custom_ramdisk_patch.sh 2>/dev/null | grep suhide >/dev/null); then
+    rm /data/custom_ramdisk_patch.sh
+    rm /data/adb/suhide*
+
+    ui_print "Old version of suhide found and removed"
+    ui_print "!!! PLEASE RE-FLASH SUPERSU !!!"
+    ui_print " "
+fi
+
+# force create /data/adb (our sockets live there)
+
+if [ ! -d "/data/adb" ]; then
+    mkdir /data/adb
+    chown 0.0 /data/adb
+    chmod 0700 /data/adb
+    chcon u:object_r:adb_data_file:s0 /data/adb
+fi
+
+# force remove old socket files
+
+rm -rf /data/adb/socket_*
+
+# some checks
+
+if [ -f "/system/xbin/su" ]; then
+    ui_print "Fatal error: /system/xbin/su found"
+    ui_print "Do you have SuperSU v2.78 SR1 or newer installed in systemless mode ?"
+    exit 1
+fi
+
+if [ -f "/system/bin/su" ]; then
+    ui_print "Fatal error: /system/bin/su found"
+    ui_print "Do you have SuperSU v2.78 SR1 or newer installed in systemless mode ?"
+    exit 1
+fi
+
+if [ -f "/system/bin/app_process32_xposed" ]; then
+    ui_print "Fatal error: /system/bin/app_process32_xposed found"
+    ui_print "Xposed it not currently supported"
+    exit 1
+fi
+
+if [ -f "/system/bin/app_process64_xposed" ]; then
+    ui_print "Fatal error: /system/bin/app_process64_xposed found"
+    ui_print "Xposed it not currently supported"
+    exit 1
+fi
+
+# mount /su
+
+mkdir /su
+
+is_mounted() {
+  if [ ! -z "$2" ]; then
+    cat /proc/mounts | grep $1 | grep $2, >/dev/null
+  else
+    cat /proc/mounts | grep $1 >/dev/null
+  fi
+  return $?
+}
+
+SUIMG=/data/su.img
+LOOPDEVICE=
+for LOOP in 0 1 2 3 4 5 6 7; do
+    if (! is_mounted /su); then
+        LOOPDEVICE=/dev/block/loop$LOOP
+        if [ ! -f "$LOOPDEVICE" ]; then
+            mknod $LOOPDEVICE b 7 $LOOP
+        fi
+        losetup $LOOPDEVICE $SUIMG
+        if [ "$?" -eq "0" ]; then
+            mount -t ext4 -o loop $LOOPDEVICE /su
+            if (! is_mounted /su); then
+                /system/bin/toolbox mount -t ext4 -o loop $LOOPDEVICE /su
+            fi
+            if (! is_mounted /su); then
+                /system/bin/toybox mount -t ext4 -o loop $LOOPDEVICE /su
+            fi
+        fi
+        if (is_mounted /su); then
+            break;
+        fi
+    fi
+done
+
+if (! is_mounted /su); then
+    ui_print "Fatal error: /su could not be mounted"
+    ui_print "Do you have SuperSU v2.78 SR1 or newer installed in systemless mode ?"
+    exit 1
+fi
+
+# detects bits
+
+ui_print "Detecting ..."
+
+HAPLOID32=haploid32
+HAPLOID64=haploid64
+DIPLOID64=libdiploid64.so
+if [ -d "/system/lib64" ]; then
+    DIPLOID32=libdiploid64_32.so
+    BITS64=true
+else
+    DIPLOID32=libdiploid32.so
+    BITS64=false
+fi
+
+# detect architecture
+
+ABI=$(cat /system/build.prop /default.prop | grep -m 1 "ro.product.cpu.abi=" | dd bs=1 skip=19 count=3)
+ABILONG=$(cat /system/build.prop /default.prop | grep -m 1 "ro.product.cpu.abi=" | dd bs=1 skip=19)
+ABI2=$(cat /system/build.prop /default.prop | grep -m 1 "ro.product.cpu.abi2=" | dd bs=1 skip=20 count=3)
+ARCH=arm
+
+if [ "$ABI" = "x86" ]; then ARCH=x86; fi;
+if [ "$ABI2" = "x86" ]; then ARCH=x86; fi;
+
+if [ "$ABILONG" = "armeabi-v7a" ]; then ARCH=armv7; fi;
+if [ "$ABI" = "mip" ]; then ARCH=mips; fi;
+if [ "$ABILONG" = "mips" ]; then ARCH=mips; fi;
+
+if [ "$ABILONG" = "arm64-v8a" ]; then ARCH=arm64; fi;
+if [ "$ABILONG" = "mips64" ]; then ARCH=mips64; fi;
+if [ "$ABILONG" = "x86_64" ]; then ARCH=x64; fi;
+
+ui_print "- $ARCH"
+ui_print " "
+
+# place files
+
+ui_print "Copying files ..."
+
+mkdir /su/suhide
+chown 0.0 /su/suhide
+chmod 0755 /su/suhide
+chcon u:object_r:system_file:s0 /su/suhide
+
+for FILE in app_process32 app_process64; do
+    cp /system/bin/$FILE /su/suhide/$FILE
+    chown 0.0 /su/suhide/$FILE
+    chmod 0755 /su/suhide/$FILE
+    chcon u:object_r:zygote_exec:s0 /su/suhide/$FILE
+done
+
+for FILE in $HAPLOID32 $HAPLOID64 $DIPLOID32 $DIPLOID64; do
+    cp /tmp/suhide/$ARCH/$FILE /su/suhide/$FILE
+    chown 0.0 /su/suhide/$FILE
+    chmod 0755 /su/suhide/$FILE
+    chcon u:object_r:system_file:s0 /su/suhide/$FILE
+done
+
+for FILE in add rm list; do
+    cp /tmp/suhide/common/$FILE /su/suhide/$FILE
+    chown 0.0 /su/suhide/$FILE
+    chmod 0700 /su/suhide/$FILE
+    chcon u:object_r:system_file:s0 /su/suhide/$FILE
+done
+
+cp /tmp/suhide/common/05suhide /su/su.d/05suhide
+chown 0.0 /su/su.d/05suhide
+chmod 0700 /su/su.d/05suhide
+chcon u:object_r:system_file:s0 /su/su.d/05suhide
+
+ui_print "- Complete"
+ui_print " "
+
+if [ ! -f "/su/suhide/suhide.uid" ]; then
+    ui_print "Creating defaults..."
+    echo `ls -ndl /data/data/com.google.android.gms | tr -s " " | cut -f 3 -d " "`>/su/suhide/suhide.uid
+    ui_print "- Complete"
+    ui_print " "
+fi
+
+# done
+
+cd /tmp
+rm -rf /tmp/suhide
+cd /
+
+umount /su
+rmdir /su
+
+ui_print "**********************"
+ui_print "Installation complete!"
+ui_print "**********************"
+ui_print " "
+
+exit 0
