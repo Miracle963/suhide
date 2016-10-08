@@ -1,0 +1,8 @@
+* file_contexts 0000_file_contexts
+* fstab.hammerhead 0001_fstab.hammerhead
+* init.environ.rc 0002_init.environ.rc
+* init.rc 0003_init.rc
+* sepolicy 0004_sepolicy
++ init.supersu.rc
++ sbin/launch_daemonsu.sh
++ su

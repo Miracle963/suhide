@@ -1,0 +1,82 @@
+Signature-Version: 1.0
+SHA1-Digest-Manifest: 8B3pKsAzJAx4inWYGtQjKUA4paQ=
+Created-By: 1.0 (Android SignApk)
+
+Name: META-INF/com/google/android/updater-script
+SHA1-Digest: AWRy+yqwENtG1lv+gHXBFJuAe80=
+
+Name: armv7/libdiploid32.so
+SHA1-Digest: SxuyQcw//4zxeJ1Z2MZWX5spJh4=
+
+Name: armv7/haploid32
+SHA1-Digest: Tpf07miZwtXCdfbZ8x9HLBJfs2A=
+
+Name: x86/haploid32
+SHA1-Digest: cN980ngPQstorIM5PjGF/r4BC2s=
+
+Name: arm/libdiploid32.so
+SHA1-Digest: +F2PPj9ZH+qWlIZ1Y+eY28X3GnM=
+
+Name: x86/libdiploid32.so
+SHA1-Digest: AZqvU/BgiUIXhRtnJLcvPdigMlY=
+
+Name: arm64/haploid32
+SHA1-Digest: hl8cSb0GpDd0bC6Sxh9rnlrFv2U=
+
+Name: arm64/libdiploid64.so
+SHA1-Digest: hK7qBEFcWdCCNFZEhKnkZbqWdS0=
+
+Name: mips64/haploid64
+SHA1-Digest: 2oud6EWB9VWagXolkgjqEDbDp4k=
+
+Name: common/list
+SHA1-Digest: q1Fm5rXvn+MvsMF9KwrgD43QHYk=
+
+Name: x64/haploid64
+SHA1-Digest: tlA+oinaUxzmkeUQv1nK+tFG6vg=
+
+Name: x64/libdiploid64_32.so
+SHA1-Digest: 8ofhOKe8dDG1kb0SwalrMPPwRQI=
+
+Name: META-INF/com/google/android/update-binary
+SHA1-Digest: evDTXz1GO2YCu//+YX8v6fKdKs8=
+
+Name: mips/libdiploid32.so
+SHA1-Digest: fUilwznmVzFT+s3h6mPRwyfynxA=
+
+Name: mips/haploid32
+SHA1-Digest: EdyY66QOHA9MhupP2ONSGIsTNZM=
+
+Name: mips64/libdiploid64.so
+SHA1-Digest: L5FHKXxCGWifVm7NSlpfEyh6bw8=
+
+Name: arm/haploid32
+SHA1-Digest: REfTZp7F45bpghPaFkwsP5VsQCc=
+
+Name: arm64/libdiploid64_32.so
+SHA1-Digest: yZBBITgvBA1EzR5MGMVlsUIZ/BE=
+
+Name: common/rm
+SHA1-Digest: RAY6QGmSC/dz6Q8DKIqxxM4tAMo=
+
+Name: mips64/libdiploid64_32.so
+SHA1-Digest: aowcp58OKACAHmDu4L9kAvWauik=
+
+Name: common/add
+SHA1-Digest: pA9foOpjFmTpKqswTOhjzPHULlc=
+
+Name: arm64/haploid64
+SHA1-Digest: TRouF9spwQVezG0CMuXjquxepbA=
+
+Name: common/05suhide
+SHA1-Digest: RTRp9X0JfWp9ZPOpBpcKDajZjQE=
+
+Name: x64/libdiploid64.so
+SHA1-Digest: QUBdbC/Vm0FG152RnkC5g3uARmU=
+
+Name: mips64/haploid32
+SHA1-Digest: 5T5F/0FfNi/rjI3TYyi1B2SW5tg=
+
+Name: x64/haploid32
+SHA1-Digest: wWFiCL81Gq2iDcbrLIxT05Ods3U=
+
